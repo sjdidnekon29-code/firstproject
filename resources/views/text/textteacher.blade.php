@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Messages</title>
+<title>Teacher Messages</title>
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -56,7 +55,7 @@ body{
     flex-direction:column;
 }
 
-/* MESSAGES AREA */
+/* MESSAGES */
 .messages{
     flex:1;
     overflow-y:auto;
@@ -64,11 +63,10 @@ body{
     padding-bottom:120px;
 }
 
-/* MESSAGE BOX */
+/* MESSAGE */
 .message{
     display:flex;
     justify-content:space-between;
-    align-items:flex-start;
     gap:20px;
     margin-bottom:15px;
     background:rgba(255,255,255,.08);
@@ -77,10 +75,7 @@ body{
     backdrop-filter:blur(10px);
 }
 
-/* LEFT = TEXT */
-.message-text{
-    flex:1;
-}
+.message-text{ flex:1; }
 
 .message-text p{
     font-size:16px;
@@ -88,7 +83,6 @@ body{
     color:#e2e8f0;
 }
 
-/* RIGHT = USER + BUTTONS */
 .message-side{
     width:180px;
     display:flex;
@@ -103,7 +97,6 @@ body{
     color:#cbd5e1;
 }
 
-/* BUTTONS */
 .btn{
     border:none;
     color:white;
@@ -113,23 +106,13 @@ body{
     font-size:13px;
 }
 
-.copy-btn{
-    background:#6366f1;
-}
+.copy-btn{ background:#6366f1; }
+.copy-btn:hover{ background:#4f46e5; }
 
-.copy-btn:hover{
-    background:#4f46e5;
-}
+.delete-btn{ background:#dc2626; }
+.delete-btn:hover{ background:#b91c1c; }
 
-.delete-btn{
-    background:#dc2626;
-}
-
-.delete-btn:hover{
-    background:#b91c1c;
-}
-
-/* INPUT BOX FIXED */
+/* INPUT */
 .chat-form{
     position:fixed;
     bottom:0;
@@ -170,32 +153,24 @@ body{
     cursor:pointer;
 }
 
-/* MOBILE */
 @media(max-width:768px){
-
-    .message{
-        flex-direction:column;
-    }
-
+    .message{ flex-direction:column; }
     .message-side{
         width:100%;
         flex-direction:row;
         justify-content:space-between;
-        align-items:center;
     }
-
     .chat-form form{
         flex-direction:column;
     }
-
     .send-btn{
         width:100%;
         height:45px;
     }
 }
-
 </style>
 </head>
+
 <body>
 
 <div class="chat-container">
@@ -208,74 +183,58 @@ body{
             <small>Class ID: {{ $class_id }}</small>
         </div>
         <div style="margin-left:auto;">
-            <a href="{{ route('teacherdashboard') }}" class="btn" style="background:#334155;">teacher dashboard</a>
+            <a href="{{ route('teacherdashboard') }}" class="btn" style="background:#334155;">
+                dashboard
+            </a>
         </div>
     </div>
-   
 
     <!-- MESSAGES -->
-   <div class="messages">
-
-    @forelse($messages as $message)
-
     <div class="messages" id="messages-container">
+        @forelse($messages as $message)
+        <div class="message">
 
-        <!-- LEFT: TEXT -->
-        <div class="message-text">
-            <p id="msg{{ $message->id }}">
-                {{ $message->message }}
-            </p>
-        </div>
-
-        <!-- RIGHT: NAME + ACTIONS -->
-        <div class="message-side">
-
-            <div class="sender">
-                👤 {{ $message->name }}
+            <div class="message-text">
+                <p id="msg{{ $message->id }}">
+                    {{ $message->message }}
+                </p>
             </div>
 
-            <button class="btn copy-btn"
-                    type="button"
-                    onclick="copyMessage('msg{{ $message->id }}')">
-                📋 Copy
-            </button>
+            <div class="message-side">
 
-            <form action="{{ route('messages.delete', $message->id) }}"
-                  method="POST">
+                <div class="sender">
+                    👤 {{ $message->name }}
+                </div>
 
-                @csrf
-                @method('DELETE')
-
-                <button type="submit"
-                        class="btn delete-btn"
-                        onclick="return confirm('Delete message?')">
-                    🗑 Delete
+                <button class="btn copy-btn"
+                        type="button"
+                        onclick="copyMessage('msg{{ $message->id }}')">
+                    📋 Copy
                 </button>
 
-            </form>
+                <form action="{{ route('messages.delete', $message->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn delete-btn"
+                            onclick="return confirm('Delete message?')">
+                        🗑 Delete
+                    </button>
+                </form>
+
+            </div>
 
         </div>
-
-    </div>
-
-    @empty
-
-    <div class="message">
-        <div class="message-text">
-            No messages found.
+        @empty
+        <div class="message">
+            <div class="message-text">No messages found.</div>
         </div>
+        @endforelse
     </div>
-
-    @endforelse
-
-</div>
 </div>
 
-<!-- INPUT (FIXED) -->
+<!-- INPUT -->
 <div class="chat-form">
-
     <form action="{{ route('messages.store') }}" method="POST">
-
         @csrf
 
         <input type="hidden" name="name" value="{{ auth()->user()->name }}">
@@ -283,30 +242,37 @@ body{
 
         <textarea name="message" placeholder="Type your message..." required></textarea>
 
-        <button type="submit" class="send-btn">
-            Send
-        </button>
-
+        <button type="submit" class="send-btn">Send</button>
     </form>
-
 </div>
 
 <script>
 function copyMessage(id){
     let text = document.getElementById(id).innerText;
-
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            alert("Message copied!");
-        })
-        .catch(err => {
-            console.error(err);
-        });
+    navigator.clipboard.writeText(text);
 }
 
-// Auto refresh page every 3 seconds
+// detect typing
+let isTyping = false;
+const textarea = document.querySelector("textarea[name='message']");
+
+textarea.addEventListener("focus", () => isTyping = true);
+textarea.addEventListener("blur", () => isTyping = false);
+textarea.addEventListener("input", () => isTyping = true);
+
+// auto refresh messages only (no full reload)
 setInterval(() => {
-    location.reload();
+    if (isTyping) return;
+
+    fetch(window.location.href)
+        .then(res => res.text())
+        .then(html => {
+            const doc = new DOMParser().parseFromString(html, "text/html");
+
+            document.getElementById("messages-container").innerHTML =
+                doc.getElementById("messages-container").innerHTML;
+        });
+
 }, 3000);
 </script>
 
