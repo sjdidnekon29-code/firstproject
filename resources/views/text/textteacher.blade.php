@@ -218,7 +218,7 @@ body{
 
     @forelse($messages as $message)
 
-    <div class="message">
+    <div class="messages" id="messages-container">
 
         <!-- LEFT: TEXT -->
         <div class="message-text">
@@ -294,9 +294,20 @@ body{
 <script>
 function copyMessage(id){
     let text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text);
-    alert("Message copied!");
+
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            alert("Message copied!");
+        })
+        .catch(err => {
+            console.error(err);
+        });
 }
+
+// Auto refresh page every 3 seconds
+setInterval(() => {
+    location.reload();
+}, 3000);
 </script>
 
 </body>

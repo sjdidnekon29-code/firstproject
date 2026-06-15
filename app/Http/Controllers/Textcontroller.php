@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Textstudent;
 class Textcontroller extends Controller
-{
+{   
+    
     public function store(Request $request){
         $request->validate([
             'name' => 'required',
@@ -21,16 +22,25 @@ class Textcontroller extends Controller
 
         return redirect()->back()->with('success', 'Message sent successfully.');
     }
-    public function index(int $id){
-        $messages = Textstudent::where('class_id', $id)->get();
-       $class_id = $id;
-        return view('text.textstudent', compact('messages' , 'class_id'));
-    }
-    public function index_teacher(int $id){
-        $messages = Textstudent::where('class_id', $id)->get();
-       $class_id = $id;
-        return view('text.textteacher', compact('messages' , 'class_id'));
-    }
+ public function index(int $id){
+    $messages = Textstudent::where('class_id', $id)
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    $class_id = $id;
+
+    return view('text.textstudent', compact('messages','class_id'));
+}
+
+public function index_teacher(int $id){
+    $messages = Textstudent::where('class_id', $id)
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    $class_id = $id;
+
+    return view('text.textteacher', compact('messages','class_id'));
+}
     public function destroy(int $id){
         $userId = auth()->id();
 //          $message = Textstudent::where('id', $id)->where('student_id', $userId)->firstOrFail();

@@ -214,7 +214,7 @@ body{
    
 
     <!-- MESSAGES -->
-   <div class="messages">
+   <div class="messages" id="messages-container">
 
     @forelse($messages as $message)
 
@@ -251,6 +251,7 @@ body{
                         onclick="return confirm('Delete message?')">
                     🗑 Delete
                 </button>
+        
 
             </form>
 
@@ -294,9 +295,20 @@ body{
 <script>
 function copyMessage(id){
     let text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text);
-    alert("Message copied!");
+
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            alert("Message copied!");
+        })
+        .catch(err => {
+            console.error(err);
+        });
 }
+
+// Auto refresh page every 3 seconds
+setInterval(() => {
+    location.reload();
+}, 3000);
 </script>
 
 </body>
